@@ -111,6 +111,10 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
         id: login-ecr   
 
+      - name: Update the proxy
+        run: | 
+          sed -i 's|http://localhost:5000|http://app-api|g' package.json
+          cat package.json
       - name: Build docker Image and Push
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
