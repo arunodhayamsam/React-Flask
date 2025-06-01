@@ -10,9 +10,31 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
 jobs:
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
   # This workflow contains a single job called "build"
-  build:
+  build-backend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend == 'true'
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -36,14 +58,16 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
         id: login-ecr   
 
-      # - name: Build docker Image and Push
-      #   env:
-      #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     REPOSITORY: node-app 
-      #     IMAGE_TAG: $(echo ${{ github.sha }} | head -c 8)
-      #   run: |
-      #     docker build -t $REGISTRY/$REPOSITORY:${{ env.IMAGE_TAG }} .
-      #     docker push $REGISTRY/$REPOSITORY:${{ env.IMAGE_TAG }}
+      - name: Build docker Image and Push
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: api
+          # IMAGE_TAG: $(echo ${{ github.sha }} | head -c 8)
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:${{ env.IMAGE_TAG }} ./backend
+          docker push $REGISTRY/$REPOSITORY:${{ env.IMAGE_TAG }}
+          docker build -t $REGISTRY/$REPOSITORY:master ./backend
+          docker push $REGISTRY/$REPOSITORY:master
 
       - name: Print branch name
         run: |
@@ -65,3 +89,57 @@ jobs:
       # - run: |
       #     kubectl get node    
       #     kubectl apply -f deployment.yml
+
+  build-frontend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Kubectl
+        uses: azure/setup-kubectl@v3   
+        id: install  
+
+      - name: Configure aws creds
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr   
+
+      - name: Build docker Image and Push
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ui
+          IMAGE_TAG: $(echo ${{ github.sha }} | head -c 8)
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:master ./frontend
+          docker push $REGISTRY/$REPOSITORY:master
+          docker build -t $REGISTRY/$REPOSITORY:${{ env.IMAGE_TAG }} ./frontend
+          docker push $REGISTRY/$REPOSITORY:${{ env.IMAGE_TAG }}
+
+      - name: Print branch name
+        run: |
+          echo "Current branch: ${GITHUB_REF##*/}"    
+          
+      # - name: Configure the deployment file
+      #   env:
+      #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     REPOSITORY: node-app 
+      #     IMAGE_TAG: $(echo ${{ github.sha }} | head -c 8)
+      #   run: |
+      #     DOCKER=$REGISTRY/$REPOSITORY:${{ env.IMAGE_TAG }}
+      #     sed -i 's@CONTAINER_IMAGE@'"$DOCKER"'@' deployment.yml
+      
+      # - name: Deploy the application     
+      #   uses: tale/kubectl-action@v1
+      #   with:
+      #     base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+      # - run: |
+      #     kubectl get node    
+      #     kubectl apply -f deployment.yml
+      
