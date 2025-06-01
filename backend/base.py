@@ -6,7 +6,7 @@ api = Flask(__name__)
 def my_profile():
     response_body = {
         "name": "Nagato",
-        "about" :"Hello! I'm a full stack developer that loves python and javascript yes"
+        "about" :"Hello! I'm a full stack developer that loves python and javascript"
     }
 
     return response_body
