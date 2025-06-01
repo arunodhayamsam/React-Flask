@@ -113,7 +113,7 @@ jobs:
 
       - name: Update the proxy
         run: | 
-          sed -i 's|http://localhost:5000|http://app-api|g' package.json
+          sed -i 's|http://localhost:5000|http://app-api|g' ./frontend/package.json
           cat package.json
       - name: Build docker Image and Push
         env:
