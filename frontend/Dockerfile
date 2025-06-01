@@ -10,7 +10,7 @@ RUN npm install
 
 COPY . .
 
-RUN sed -i 's/localhost/api/g' package.json
+# RUN sed -i 's/localhost/api/g' package.json
 
 EXPOSE 3000
 
