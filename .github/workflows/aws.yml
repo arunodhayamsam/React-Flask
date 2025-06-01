@@ -34,7 +34,7 @@ jobs:
   # This workflow contains a single job called "build"
   build-backend:
     needs: detect-changes
-    if: needs.detect-changes.outputs.backend == 'true'
+    if: needs.detect-changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -92,7 +92,7 @@ jobs:
 
   build-frontend:
     needs: detect-changes
-    if: needs.detect-changes.outputs.frontend == 'true'
+    if: needs.detect-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -113,6 +113,7 @@ jobs:
 
       - name: Update the proxy
         run: | 
+          ls -la
           sed -i 's|http://localhost:5000|http://app-api|g' ./frontend/package.json
           cat package.json
       - name: Build docker Image and Push
