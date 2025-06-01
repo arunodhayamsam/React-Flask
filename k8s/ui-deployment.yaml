@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name:  ui-app
-        image:  211125293311.dkr.ecr.us-east-1.amazonaws.com/ui:master
+        image:  211125293311.dkr.ecr.us-east-1.amazonaws.com/ui:63d3785b
         resources:
           requests:
             cpu: 500m
