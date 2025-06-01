@@ -116,7 +116,7 @@ jobs:
           ls -la
           ls -la frontend
           sed -i 's|http://localhost:5000|http://app-api|g' ./frontend/package.json
-          cat package.json
+          cat ./frontend/package.json
       - name: Build docker Image and Push
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
