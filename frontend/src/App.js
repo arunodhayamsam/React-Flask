@@ -25,7 +25,7 @@ function App() {
         console.log(error.response.headers)
         }
     })}
-    //end of new line 
+    //end of new lin
     
   return (
     <div className="App">
