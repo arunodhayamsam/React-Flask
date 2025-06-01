@@ -26,11 +26,11 @@ spec:
         image:  211125293311.dkr.ecr.us-east-1.amazonaws.com/ui:master
         resources:
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 500m
+            memory: 512Mi
           limits:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 500m
+            memory: 512Mi
         ports:
         - containerPort:  3000
           name:  ui-app
@@ -45,13 +45,12 @@ spec:
   selector:
     app: ui-app
   type: LoadBalancer
-  sessionAffinity: None
-  sessionAffinityConfig:
-    clientIP:
-      timeoutSeconds: 10800
+  # sessionAffinity: None
+  # sessionAffinityConfig:
+  #   clientIP:
+  #     timeoutSeconds: 10800
   ports:
   - name: ui-app
     protocol: TCP
     port: 80
     targetPort: 3000
- 
