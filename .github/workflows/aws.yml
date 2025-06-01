@@ -62,7 +62,7 @@ jobs:
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: api
-          # IMAGE_TAG: $(echo ${{ github.sha }} | head -c 8)
+          IMAGE_TAG: $(echo ${{ github.sha }} | head -c 8)
         run: |
           docker build -t $REGISTRY/$REPOSITORY:${{ env.IMAGE_TAG }} ./backend
           docker push $REGISTRY/$REPOSITORY:${{ env.IMAGE_TAG }}
